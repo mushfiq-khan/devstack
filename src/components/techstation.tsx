@@ -17,7 +17,7 @@ const TechSection = () => {
 
   // Load technology data from public/technologies.json
   useEffect(() => {
-    fetch('./technologies.json')
+    fetch('/technologies.json')
       .then((res) => res.json())
       .then((data) => setTechnologies(data))
       .catch((err) => console.error('Error loading JSON data:', err));
