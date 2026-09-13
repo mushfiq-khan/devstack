@@ -46,7 +46,7 @@ const TechSection = () => {
   };
 
   return (
-    <section className="bg-gray-50/50 py-12 md:py-16">
+    <section className="bg-white py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         
         {/* Section Header */}
