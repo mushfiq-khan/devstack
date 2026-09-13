@@ -14,13 +14,21 @@ export interface Technology {
 const TechSection = () => {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
   const [selectedStack, setSelectedStack] = useState<Technology[]>([]);
+  // ১. লোডিং স্টেট যুক্ত করা হলো
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Load technology data from public/technologies.json
   useEffect(() => {
     fetch('/technologies.json')
       .then((res) => res.json())
-      .then((data) => setTechnologies(data))
-      .catch((err) => console.error('Error loading JSON data:', err));
+      .then((data) => {
+        setTechnologies(data);
+        setLoading(false); // ২. ডেটা আসার পর লোডিং বন্ধ
+      })
+      .catch((err) => {
+        console.error('Error loading JSON data:', err);
+        setLoading(false);
+      });
   }, []);
 
   // Add technology with duplicate check
@@ -62,60 +70,70 @@ const TechSection = () => {
         {/* Layout: 3 Columns Grid + 1 Column Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           
-          {/* Technology Cards Grid (1 col mobile, 2 col tablet, 3 col desktop) */}
-          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {technologies.map((tech) => {
-              const isSelected = selectedStack.some((item) => item.id === tech.id);
+          {/* Technology Cards Grid */}
+          <div className="lg:col-span-3">
+            {/* ৩. লোডিং অবস্থায় Spinner/Loading UI দেখানো */}
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                <div className="w-10 h-10 border-4 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-medium text-gray-500 mt-4">Loading technologies...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {technologies.map((tech) => {
+                  const isSelected = selectedStack.some((item) => item.id === tech.id);
 
-              return (
-                <div 
-                  key={tech.id} 
-                  className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Icon & Badge */}
-                    <div className="flex items-center justify-between mb-4">
-                      <img src={tech.icon} alt={tech.name} className="w-10 h-10 object-contain" />
-                      <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-pink-50 text-pink-600 border border-pink-100">
-                        {tech.badge}
-                      </span>
+                  return (
+                    <div 
+                      key={tech.id} 
+                      className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                    >
+                      <div>
+                        {/* Icon & Badge */}
+                        <div className="flex items-center justify-between mb-4">
+                          <img src={tech.icon} alt={tech.name} className="w-10 h-10 object-contain" />
+                          <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-pink-50 text-pink-600 border border-pink-100">
+                            {tech.badge}
+                          </span>
+                        </div>
+
+                        {/* Name & Description */}
+                        <h3 className="text-lg font-bold text-gray-900">{tech.name}</h3>
+                        <p className="text-xs text-gray-500 mt-2 leading-relaxed min-h-[48px]">
+                          {tech.description}
+                        </p>
+
+                        {/* Category Chip, Difficulty, Rating */}
+                        <div className="flex items-center gap-2 mt-4 text-[11px] text-gray-500">
+                          <span className="bg-gray-100 px-2.5 py-1 rounded font-medium text-gray-700">
+                            {tech.category}
+                          </span>
+                          <span className="bg-gray-50 px-2 py-1 rounded border border-gray-100 text-gray-500">
+                            {tech.difficulty}
+                          </span>
+                          <span className="ml-auto font-bold text-amber-500 flex items-center gap-1">
+                            ★ {tech.rating}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Add to Stack Button */}
+                      <button
+                        onClick={() => handleAddToStack(tech)}
+                        disabled={isSelected}
+                        className={`w-full mt-5 py-2.5 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                            : 'bg-slate-900 hover:bg-slate-800 text-white'
+                        }`}
+                      >
+                        {isSelected ? '✓ Added to Stack' : 'Add to Stack'}
+                      </button>
                     </div>
-
-                    {/* Name & Description */}
-                    <h3 className="text-lg font-bold text-gray-900">{tech.name}</h3>
-                    <p className="text-xs text-gray-500 mt-2 leading-relaxed min-h-[48px]">
-                      {tech.description}
-                    </p>
-
-                    {/* Category Chip, Difficulty, Rating */}
-                    <div className="flex items-center gap-2 mt-4 text-[11px] text-gray-500">
-                      <span className="bg-gray-100 px-2.5 py-1 rounded font-medium text-gray-700">
-                        {tech.category}
-                      </span>
-                      <span className="bg-gray-50 px-2 py-1 rounded border border-gray-100 text-gray-500">
-                        {tech.difficulty}
-                      </span>
-                      <span className="ml-auto font-bold text-amber-500 flex items-center gap-1">
-                        ★ {tech.rating}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Add to Stack Button */}
-                  <button
-                    onClick={() => handleAddToStack(tech)}
-                    disabled={isSelected}
-                    className={`w-full mt-5 py-2.5 rounded-xl font-semibold text-xs transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                        : 'bg-slate-900 hover:bg-slate-800 text-white'
-                    }`}
-                  >
-                    {isSelected ? '✓ Added to Stack' : 'Add to Stack'}
-                  </button>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Your Stack Sidebar */}
@@ -131,7 +149,6 @@ const TechSection = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {/* Stack Items (1 Column) */}
                 {selectedStack.map((item) => (
                   <div 
                     key={item.id} 
@@ -154,7 +171,6 @@ const TechSection = () => {
                   </div>
                 ))}
 
-                {/* Remove All Button */}
                 <button
                   onClick={handleRemoveAll}
                   className="w-full mt-4 py-2 border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-semibold rounded-xl transition-all cursor-pointer"
